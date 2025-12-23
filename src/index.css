@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+:root {
+  /* Brand Colors */
+  --primary: #FF8BA7; /* Soft Pink - Mommy friendly but active */
+  --primary-dark: #FF5E86;
+  --primary-light: #FFC4D6;
+  --secondary: #33D9B2; /* Fresh Mint */
+  
+  /* UI Colors */
+  --background: #FAFAFA;
+  --surface: #FFFFFF;
+  --text-main: #2D3436;
+  --text-sub: #636E72;
+  --border: #F0F0F0;
+  --error: #FF6B6B;
+  
+  /* Metrics */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+  --shadow-lg: 0 16px 32px rgba(0,0,0,0.08);
+  
+  /* Layout */
+  --header-height: 60px;
+  --nav-height: 70px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  line-height: 1.5;
+  font-smooth: always;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  max-width: 600px; /* Mobile Viewport limit for desktop pleasantness */
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: var(--surface);
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.05);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Utilities */
+.container {
+  padding: 24px;
+  padding-bottom: calc(var(--nav-height) + var(--safe-area-bottom) + 24px);
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  font-weight: 700;
+  padding: 16px 24px;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(255, 94, 134, 0.3);
+  transition: transform 0.2s;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
