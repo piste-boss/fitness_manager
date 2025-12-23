@@ -81,7 +81,7 @@ export default function Home() {
                 />
                 <ActionButton
                     icon={Calendar}
-                    title="レッスンの予約"
+                    title="オンライン予約"
                     subtitle="Reservaで簡単予約"
                     color="#FF8BA7"
                     href="https://reserva.be/" // Placeholder

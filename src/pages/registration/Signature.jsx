@@ -24,7 +24,7 @@ export default function Signature() {
     return (
         <div className="container">
             <header style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', gap: '8px' }}>
-                <button onClick={() => navigate('/register/form')}><ChevronLeft size={24} /></button>
+                <button onClick={() => navigate('/register/terms')}><ChevronLeft size={24} /></button>
                 <h1 style={{ fontSize: '1.25rem', fontWeight: '700' }}>同意・署名</h1>
             </header>
 
@@ -60,7 +60,7 @@ export default function Signature() {
                         クリア
                     </button>
                     <button className="btn-primary" onClick={save}>
-                        次へ（決済）
+                        次へ
                     </button>
                 </div>
             </div>

@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { Home, Dumbbell, Utensils, User, Calendar } from 'lucide-react';
+import { Home as HomeIcon, Dumbbell, Utensils, User, Calendar, Scale } from 'lucide-react';
 
 import Home from './pages/Home';
-const WeightPage = () => <div className="container"><h1>Weight</h1></div>;
+const ExercisePage = () => <div className="container"><h1>Exercise Record</h1></div>;
+const WeightPage = () => <div className="container"><h1>Weight Record</h1></div>;
 const CoachPage = () => <div className="container"><h1>AI Coach</h1></div>;
 const MenuPage = () => <div className="container"><h1>Menu</h1></div>;
 const RegisterPage = () => <div className="container"><h1>Register</h1></div>;
@@ -32,8 +33,9 @@ const Navigation = () => {
       paddingTop: '12px',
       zIndex: 100
     }}>
-      <NavItem icon={<Home size={24} />} label="ホーム" to="/" active={isActive('/')} />
-      <NavItem icon={<Calendar size={24} />} label="運動記録" to="/weight" active={isActive('/weight')} />
+      <NavItem icon={<HomeIcon size={24} />} label="ホーム" to="/" active={isActive('/')} />
+      <NavItem icon={<Calendar size={24} />} label="運動記録" to="/exercise" active={isActive('/exercise')} />
+      <NavItem icon={<Scale size={24} />} label="体重記録" to="/weight" active={isActive('/weight')} />
       <NavItem icon={<Dumbbell size={24} />} label="コーチ" to="/coach" active={isActive('/coach')} />
       <NavItem icon={<User size={24} />} label="マイページ" to="/menu" active={isActive('/menu')} />
     </nav>
@@ -75,12 +77,13 @@ function App() {
       <RegistrationProvider>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/exercise" element={<ExercisePage />} />
           <Route path="/weight" element={<WeightPage />} />
           <Route path="/coach" element={<CoachPage />} />
           <Route path="/menu" element={<MenuPage />} />
 
           {/* Registration Flow */}
-          <Route path="/register" element={<Terms />} />
+          <Route path="/register" element={<RegisterForm />} />
           <Route path="/register/terms" element={<Terms />} />
           <Route path="/register/form" element={<RegisterForm />} />
           <Route path="/register/signature" element={<Signature />} />
