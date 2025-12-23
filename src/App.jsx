@@ -36,7 +36,7 @@ const Navigation = () => {
       <NavItem icon={<HomeIcon size={24} />} label="ホーム" to="/" active={isActive('/')} />
       <NavItem icon={<Calendar size={24} />} label="運動記録" to="/exercise" active={isActive('/exercise')} />
       <NavItem icon={<Scale size={24} />} label="体重記録" to="/weight" active={isActive('/weight')} />
-      <NavItem icon={<Dumbbell size={24} />} label="コーチ" to="/coach" active={isActive('/coach')} />
+      <NavItem icon={<Dumbbell size={24} />} label="AIコーチ" to="/coach" active={isActive('/coach')} />
       <NavItem icon={<User size={24} />} label="マイページ" to="/menu" active={isActive('/menu')} />
     </nav>
   );
