@@ -7,10 +7,13 @@ import { ChevronLeft, CreditCard } from 'lucide-react';
 // Replace with your actual publishable key
 const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
 
+import { useRegistration } from '../../context/RegistrationContext';
+
 const CheckoutForm = () => {
     const stripe = useStripe();
     const elements = useElements();
     const navigate = useNavigate();
+    const { registrationData, setPaymentMethod, clearRegistration } = useRegistration();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -31,6 +34,19 @@ const CheckoutForm = () => {
             alert("決済エラー: " + error.message);
         } else {
             console.log('[PaymentMethod]', paymentMethod);
+
+            // Final Registration Payload
+            const finalPayload = {
+                ...registrationData.userInfo,
+                signature: registrationData.signature,
+                paymentMethodId: paymentMethod.id
+            };
+
+            console.log("FINAL REGISTRATION PAYLOAD:", finalPayload);
+            alert("登録完了！コンソールにデータを出力しました。");
+
+            setPaymentMethod(paymentMethod);
+            clearRegistration();
             // Process subscription on backend here
             navigate('/register/complete');
         }

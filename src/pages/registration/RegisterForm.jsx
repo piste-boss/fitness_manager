@@ -27,13 +27,16 @@ const InputGroup = ({ label, type = "text", name, value, onChange, placeholder, 
     </div>
 );
 
+import { useRegistration } from '../../context/RegistrationContext';
+
 export default function RegisterForm() {
     const navigate = useNavigate();
+    const { registrationData, updateUserInfo } = useRegistration();
     const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        birthdate: ''
+        name: registrationData.userInfo.name || '',
+        email: registrationData.userInfo.email || '',
+        phone: registrationData.userInfo.phone || '',
+        birthdate: registrationData.userInfo.birthdate || ''
     });
 
     const handleChange = (e) => {
@@ -42,7 +45,7 @@ export default function RegisterForm() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // In a real app, save to context or local storage here
+        updateUserInfo(formData);
         navigate('/register/signature');
     };
 

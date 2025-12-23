@@ -67,23 +67,27 @@ import Complete from './pages/registration/Complete';
 
 // ... (keep creating other pages)
 
+import { RegistrationProvider } from './context/RegistrationContext';
+
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/weight" element={<WeightPage />} />
-        <Route path="/coach" element={<CoachPage />} />
-        <Route path="/menu" element={<MenuPage />} />
+      <RegistrationProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/weight" element={<WeightPage />} />
+          <Route path="/coach" element={<CoachPage />} />
+          <Route path="/menu" element={<MenuPage />} />
 
-        {/* Registration Flow */}
-        <Route path="/register" element={<Terms />} />
-        <Route path="/register/terms" element={<Terms />} />
-        <Route path="/register/form" element={<RegisterForm />} />
-        <Route path="/register/signature" element={<Signature />} />
-        <Route path="/register/payment" element={<Payment />} />
-        <Route path="/register/complete" element={<Complete />} />
-      </Routes>
+          {/* Registration Flow */}
+          <Route path="/register" element={<Terms />} />
+          <Route path="/register/terms" element={<Terms />} />
+          <Route path="/register/form" element={<RegisterForm />} />
+          <Route path="/register/signature" element={<Signature />} />
+          <Route path="/register/payment" element={<Payment />} />
+          <Route path="/register/complete" element={<Complete />} />
+        </Routes>
+      </RegistrationProvider>
       <Navigation />
     </Router>
   );

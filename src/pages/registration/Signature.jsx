@@ -2,9 +2,11 @@ import React, { useRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Eraser } from 'lucide-react';
+import { useRegistration } from '../../context/RegistrationContext';
 
 export default function Signature() {
     const navigate = useNavigate();
+    const { saveSignature } = useRegistration();
     const sigCanvas = useRef({});
 
     const clear = () => sigCanvas.current.clear();
@@ -14,8 +16,8 @@ export default function Signature() {
             alert("署名をお願いします");
             return;
         }
-        // const dataUrl = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
-        // Save signature logic here
+        const dataUrl = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+        saveSignature(dataUrl);
         navigate('/register/payment');
     };
 
