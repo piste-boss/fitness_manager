@@ -125,11 +125,21 @@ export default function MealPage() {
             setIsTyping(false);
 
             if (newCalories > 0) {
-                setStats(prev => ({
-                    ...prev,
-                    consumedCalories: prev.consumedCalories + newCalories,
-                    remainingCalories: prev.remainingCalories - newCalories
-                }));
+                setStats(prev => {
+                    const newStats = {
+                        ...prev,
+                        consumedCalories: prev.consumedCalories + newCalories,
+                        remainingCalories: prev.remainingCalories - newCalories
+                    };
+
+                    // Save to localStorage for today
+                    const today = new Date().toISOString().split('T')[0];
+                    const dailyData = JSON.parse(localStorage.getItem('dailyCalories') || '{}');
+                    dailyData[today] = newStats.consumedCalories;
+                    localStorage.setItem('dailyCalories', JSON.stringify(dailyData));
+
+                    return newStats;
+                });
             }
         }, 1500); // 1.5s delay
     };

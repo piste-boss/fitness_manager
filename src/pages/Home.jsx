@@ -108,10 +108,10 @@ export default function Home() {
                 />
                 <ActionButton
                     icon={Calendar}
-                    title="オンライン予約"
-                    subtitle="Reservaで簡単予約"
+                    title="予約変更"
+                    subtitle="Reservaで簡単変更"
                     color="#FF8BA7"
-                    href="https://reserva.be/" // Placeholder
+                    href="https://reserva.be/piste/reserve?mode=service_staff&search_evt_no=52eJwzMTcxMDQFAARIATY"
                     external
                 />
                 <ActionButton
@@ -119,7 +119,7 @@ export default function Home() {
                     title="LINEでお問合せ"
                     subtitle="気軽にご質問ください"
                     color="#33D9B2"
-                    href="https://line.me/" // Placeholder
+                    href="https://lin.ee/ny2M1Gv"
                     external
                 />
             </section>
