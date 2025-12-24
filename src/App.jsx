@@ -6,6 +6,7 @@ const ExercisePage = () => <div className="container"><h1>Exercise Record</h1></
 const WeightPage = () => <div className="container"><h1>Weight Record</h1></div>;
 const CoachPage = () => <div className="container"><h1>AI Coach</h1></div>;
 const MenuPage = () => <div className="container"><h1>Menu</h1></div>;
+const MealPage = () => <div className="container"><h1>Meal Management</h1></div>;
 const RegisterPage = () => <div className="container"><h1>Register</h1></div>;
 
 const Navigation = () => {
@@ -35,6 +36,7 @@ const Navigation = () => {
     }}>
       <NavItem icon={<HomeIcon size={24} />} label="ホーム" to="/" active={isActive('/')} />
       <NavItem icon={<Calendar size={24} />} label="運動記録" to="/exercise" active={isActive('/exercise')} />
+      <NavItem icon={<Utensils size={24} />} label="食事管理" to="/meal" active={isActive('/meal')} />
       <NavItem icon={<Scale size={24} />} label="体重記録" to="/weight" active={isActive('/weight')} />
       <NavItem icon={<Dumbbell size={24} />} label="AIコーチ" to="/coach" active={isActive('/coach')} />
       <NavItem icon={<User size={24} />} label="マイページ" to="/menu" active={isActive('/menu')} />
@@ -78,6 +80,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/exercise" element={<ExercisePage />} />
+          <Route path="/meal" element={<MealPage />} />
           <Route path="/weight" element={<WeightPage />} />
           <Route path="/coach" element={<CoachPage />} />
           <Route path="/menu" element={<MenuPage />} />

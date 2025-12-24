@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Calendar, MessageCircle, ChevronRight, User } from 'lucide-react';
+import GoalModal from '../components/GoalModal';
+// import GoalDisplay from '../components/GoalDisplay';
 
 const NEWS_DATA = [
     { id: 1, date: '2025.12.20', title: '年末年始の営業について', category: '重要' },
@@ -41,6 +43,21 @@ const ActionButton = ({ icon: Icon, title, subtitle, color, href, external }) =>
 );
 
 export default function Home() {
+    const [goal, setGoal] = useState(null);
+    // const [isModalOpen, setIsModalOpen] = useState(false); // No longer needed
+
+    useEffect(() => {
+        const savedGoal = localStorage.getItem('userGoal');
+        if (savedGoal) {
+            setGoal(JSON.parse(savedGoal));
+        }
+    }, []);
+
+    const handleSaveGoal = (newGoal) => {
+        setGoal(newGoal);
+        localStorage.setItem('userGoal', JSON.stringify(newGoal));
+    };
+
     return (
         <div className="container">
             {/* Header */}
@@ -68,6 +85,16 @@ export default function Home() {
                     }} />
                 </div>
             </header>
+
+            {/* Removed GoalDisplay as requested */}
+            {/* <GoalDisplay goal={goal} onEdit={() => setIsModalOpen(true)} /> */}
+
+            {/* GoalModal is now always displayed */}
+            <GoalModal
+                isOpen={true} // Always open
+                onClose={() => { }} // No-op
+                onSave={handleSaveGoal}
+            />
 
             {/* Quick Actions */}
             <section style={{ marginBottom: '32px' }}>
