@@ -7,6 +7,7 @@ import MealPage from './pages/Meal';
 import WeightPage from './pages/Weight';
 import CoachPage from './pages/Coach';
 import ExercisePage from './pages/Exercise';
+import AdminPage from './pages/Admin';
 const RegisterPage = () => <div className="container"><h1>Register</h1></div>;
 
 const Navigation = () => {
@@ -92,6 +93,9 @@ function App() {
           <Route path="/register/signature" element={<Signature />} />
           <Route path="/register/payment" element={<Payment />} />
           <Route path="/register/complete" element={<Complete />} />
+
+          {/* Admin */}
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </RegistrationProvider>
       <Navigation />
