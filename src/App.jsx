@@ -2,11 +2,11 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { Home as HomeIcon, Dumbbell, Utensils, User, Calendar, Scale } from 'lucide-react';
 
 import Home from './pages/Home';
+import MenuPage from './pages/Menu';
+import MealPage from './pages/Meal';
 const ExercisePage = () => <div className="container"><h1>Exercise Record</h1></div>;
 const WeightPage = () => <div className="container"><h1>Weight Record</h1></div>;
 const CoachPage = () => <div className="container"><h1>AI Coach</h1></div>;
-const MenuPage = () => <div className="container"><h1>Menu</h1></div>;
-const MealPage = () => <div className="container"><h1>Meal Management</h1></div>;
 const RegisterPage = () => <div className="container"><h1>Register</h1></div>;
 
 const Navigation = () => {
