@@ -14,8 +14,8 @@ const Navigation = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
-  // Hide nav on registration pages
-  if (location.pathname.startsWith('/register')) return null;
+  // Hide nav on registration pages and admin
+  if (location.pathname.startsWith('/register') || location.pathname.startsWith('/admin')) return null;
 
   return (
     <nav style={{
