@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, Database, Key, Download, Trash2, Save, Server, Dumbbell, Plus, List, Calendar, User, Clock } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Settings, Database, Key, Download, Trash2, Save, Server, Dumbbell, Plus, List, Calendar, User, Clock, Utensils } from 'lucide-react';
 
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState('settings');
@@ -68,8 +68,34 @@ export default function AdminPage() {
                 </button>
             </div>
 
-            {activeTab === 'settings' ? <SettingsTab /> : <TrainingTab />}
+            <button
+                onClick={() => setActiveTab('counseling')}
+                style={{
+                    flex: 1,
+                    padding: '10px',
+                    borderRadius: '6px',
+                    backgroundColor: activeTab === 'counseling' ? 'white' : 'transparent',
+                    color: activeTab === 'counseling' ? 'var(--primary-dark)' : 'var(--text-sub)',
+                    fontWeight: activeTab === 'counseling' ? '700' : '500',
+                    boxShadow: activeTab === 'counseling' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                }}
+            >
+                <Utensils size={18} />
+                食事カウンセリング
+            </button>
         </div>
+
+            { activeTab === 'settings' && <SettingsTab /> }
+    { activeTab === 'training' && <TrainingTab /> }
+    { activeTab === 'counseling' && <CounselingTab /> }
+        </div >
     );
 }
 
@@ -246,6 +272,7 @@ const TrainingTab = () => {
     // State: { [menuId]: { enabled: boolean, customName: string, sets: [{ weight: string, reps: string }] } }
     const [inputState, setInputState] = useState({});
     const [logs, setLogs] = useState([]);
+    const [showHistory, setShowHistory] = useState(false);
 
     useEffect(() => {
         const saved = JSON.parse(localStorage.getItem('trainerRecords') || '[]');
@@ -374,8 +401,37 @@ const TrainingTab = () => {
         localStorage.setItem('trainerRecords', JSON.stringify(updatedLogs));
     };
 
-    // Filter logs for display
+    // Filter logs for display (Current Date)
     const filteredLogs = logs.filter(l => l.member === selectedMember && l.date === date);
+
+    // Filter logs for Past 3 Sessions History
+    const historyLogs = useMemo(() => {
+        // Get all logs for selected member sorted by date desc
+        const memberLogs = logs
+            .filter(l => l.member === selectedMember)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Get unique dates
+        const uniqueDates = [...new Set(memberLogs.map(l => l.date))];
+
+        // Take top 3 dates
+        const recentDates = uniqueDates.slice(0, 3);
+
+        // Return logs that match these dates
+        return memberLogs.filter(l => recentDates.includes(l.date));
+    }, [logs, selectedMember]);
+
+    // Group history by date
+    const groupedHistory = useMemo(() => {
+        const groups = {};
+        historyLogs.forEach(log => {
+            if (!groups[log.date]) {
+                groups[log.date] = [];
+            }
+            groups[log.date].push(log);
+        });
+        return groups;
+    }, [historyLogs]);
 
     return (
         <>
@@ -408,9 +464,31 @@ const TrainingTab = () => {
             </section>
 
             <section className="card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                    <Dumbbell size={20} color="var(--accent)" />
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>トレーニング記録入力</h2>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Dumbbell size={20} color="var(--accent)" />
+                        <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>トレーニング記録入力</h2>
+                    </div>
+                    <button
+                        onClick={() => setShowHistory(!showHistory)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            backgroundColor: showHistory ? 'var(--primary)' : 'white',
+                            color: showHistory ? 'white' : 'var(--primary)',
+                            border: '1px solid var(--primary)',
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <Clock size={16} />
+                        履歴を表示
+                    </button>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -537,7 +615,7 @@ const TrainingTab = () => {
                 </div>
             </section>
 
-            {/* Log List */}
+            {/* Daily Log List */}
             <h3 style={{ fontSize: '1rem', fontWeight: '700', marginTop: '24px', marginBottom: '12px', color: 'var(--text-sub)' }}>
                 {selectedMember} 様 - {date} の記録
             </h3>
@@ -590,6 +668,376 @@ const TrainingTab = () => {
                     ))
                 )}
             </div>
+
+            {/* History Popup */}
+            {showHistory && (
+                <div style={{
+                    position: 'fixed',
+                    top: '80px',
+                    right: '20px',
+                    width: '320px',
+                    maxHeight: 'calc(100vh - 100px)',
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                    zIndex: 1000,
+                    overflowY: 'auto',
+                    border: '1px solid var(--border)',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    <div style={{
+                        padding: '16px',
+                        borderBottom: '1px solid var(--border)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        backgroundColor: '#f8fafc',
+                        position: 'sticky',
+                        top: 0
+                    }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Clock size={16} />
+                            過去3回の履歴
+                        </h3>
+                        <button
+                            onClick={() => setShowHistory(false)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}
+                        >
+                            <Trash2 size={16} style={{ transform: 'rotate(45deg)' }} />
+                        </button>
+                    </div>
+
+                    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {Object.keys(groupedHistory).length === 0 ? (
+                            <div style={{ padding: '16px', backgroundColor: 'var(--surface)', borderRadius: '8px', textAlign: 'center', color: 'var(--text-sub)', fontSize: '0.9rem' }}>
+                                履歴はありません
+                            </div>
+                        ) : (
+                            Object.keys(groupedHistory).sort((a, b) => new Date(b) - new Date(a)).map(histDate => (
+                                <div key={histDate} style={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                                    <div style={{
+                                        backgroundColor: 'var(--surface)',
+                                        padding: '6px 12px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '700',
+                                        color: 'var(--text-main)',
+                                        borderBottom: '1px solid var(--border)'
+                                    }}>
+                                        {histDate}
+                                    </div>
+                                    <div style={{ padding: '8px 12px' }}>
+                                        {groupedHistory[histDate].map((log, idx) => (
+                                            <div key={log.id} style={{
+                                                padding: '6px 0',
+                                                borderBottom: idx === groupedHistory[histDate].length - 1 ? 'none' : '1px solid #f0f0f0'
+                                            }}>
+                                                <div style={{ fontWeight: '600', fontSize: '0.9rem', marginBottom: '2px' }}>{log.menu}</div>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                    {log.sets ? (
+                                                        log.sets.map((set, sIdx) => (
+                                                            <span key={sIdx} style={{ fontSize: '0.8rem', color: 'var(--text-sub)', backgroundColor: '#f9fafb', padding: '1px 4px', borderRadius: '4px' }}>
+                                                                {sIdx + 1}: {set.weight > 0 ? `${set.weight}kg` : '-'} x {set.reps}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-sub)' }}>
+                                                            {log.weight > 0 ? `${log.weight}kg × ` : ''}{log.reps > 0 ? `${log.reps}回 × ` : ''}{log.sets}セット
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
+// --- Counseling Component ---
+const CounselingTab = () => {
+    // Mock Members List (Should ideally be shared context)
+    const MEMBERS = ['山田 太郎', '鈴木 花子', '佐藤 健', '高橋 未来', '田中 一郎'];
+
+    // Form Options
+    const WAKEUP_TIMES = [];
+    for (let h = 4; h <= 12; h++) {
+        WAKEUP_TIMES.push(`${h.toString().padStart(2, '0')}:00`);
+        if (h !== 12) WAKEUP_TIMES.push(`${h.toString().padStart(2, '0')}:30`);
+    }
+
+    const BREAKFAST_OPTS = ["パン", "ご飯", "卵", "ウインナー", "コーヒー", "プロテイン", "その他"];
+    const LUNCH_OPTS = ["ご飯", "パン", "ラーメン", "定食", "パスタ"];
+    const DINNER_OPTS = ["ご飯", "パン", "おかず", "味噌汁", "サラダ"];
+
+    // State
+    const [selectedMember, setSelectedMember] = useState(MEMBERS[0]);
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [form, setForm] = useState({
+        wakeupTime: '07:00',
+        breakfast: [],
+        morningSnack: '',
+        lunch: [],
+        afternoonSnack: '',
+        dinner: [],
+        dessert: false,
+        alcohol: false
+    });
+
+    // Load Data
+    useEffect(() => {
+        const loadData = () => {
+            const allRecords = JSON.parse(localStorage.getItem('counselingRecords') || '{}');
+            const key = `${selectedMember}_${date}`;
+            if (allRecords[key]) {
+                setForm(allRecords[key]);
+            } else {
+                setForm({
+                    wakeupTime: '07:00',
+                    breakfast: [],
+                    morningSnack: '',
+                    lunch: [],
+                    afternoonSnack: '',
+                    dinner: [],
+                    dessert: false,
+                    alcohol: false
+                });
+            }
+        };
+        loadData();
+    }, [selectedMember, date]);
+
+    // Handlers
+    const handleCheckboxChange = (field, value) => {
+        setForm(prev => {
+            const current = prev[field] || [];
+            if (current.includes(value)) {
+                return { ...prev, [field]: current.filter(item => item !== value) };
+            } else {
+                return { ...prev, [field]: [...current, value] };
+            }
+        });
+    };
+
+    const handleSave = () => {
+        const allRecords = JSON.parse(localStorage.getItem('counselingRecords') || '{}');
+        const key = `${selectedMember}_${date}`;
+        allRecords[key] = form;
+        localStorage.setItem('counselingRecords', JSON.stringify(allRecords));
+        alert('カウンセリング内容を保存しました');
+    };
+
+    return (
+        <>
+            <section className="card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                    <User size={20} color="var(--primary)" />
+                    <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>会員・日付選択</h2>
+                </div>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ flex: 1 }}>
+                        <label className="form-label">会員名</label>
+                        <select
+                            className="form-select"
+                            value={selectedMember}
+                            onChange={(e) => setSelectedMember(e.target.value)}
+                        >
+                            {MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <label className="form-label">日付</label>
+                        <input
+                            type="date"
+                            className="form-input"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </section>
+
+            <section className="card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
+                    <Utensils size={20} color="var(--accent)" />
+                    <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>食事・生活習慣記録</h2>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    {/* Wakeup Time */}
+                    <div>
+                        <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>起床時間</label>
+                        <select
+                            className="form-select"
+                            style={{ width: '100%' }}
+                            value={form.wakeupTime}
+                            onChange={(e) => setForm({ ...form, wakeupTime: e.target.value })}
+                        >
+                            {WAKEUP_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                    </div>
+
+                    {/* Breakfast */}
+                    <div>
+                        <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>朝食</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                            {BREAKFAST_OPTS.map(opt => (
+                                <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={form.breakfast.includes(opt)}
+                                        onChange={() => handleCheckboxChange('breakfast', opt)}
+                                    />
+                                    <span style={{ fontSize: '0.9rem' }}>{opt}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Morning Snack */}
+                    <div>
+                        <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>午前間食</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="例: ナッツ、チョコレート"
+                            value={form.morningSnack}
+                            onChange={(e) => setForm({ ...form, morningSnack: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Lunch */}
+                    <div>
+                        <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>昼食</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                            {LUNCH_OPTS.map(opt => (
+                                <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={form.lunch.includes(opt)}
+                                        onChange={() => handleCheckboxChange('lunch', opt)}
+                                    />
+                                    <span style={{ fontSize: '0.9rem' }}>{opt}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Afternoon Snack */}
+                    <div>
+                        <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>午後間食</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="例: プロテイン、おにぎり"
+                            value={form.afternoonSnack}
+                            onChange={(e) => setForm({ ...form, afternoonSnack: e.target.value })}
+                        />
+                    </div>
+
+                    {/* Dinner */}
+                    <div>
+                        <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>夕食</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                            {DINNER_OPTS.map(opt => (
+                                <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={form.dinner.includes(opt)}
+                                        onChange={() => handleCheckboxChange('dinner', opt)}
+                                    />
+                                    <span style={{ fontSize: '0.9rem' }}>{opt}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Dessert & Alcohol */}
+                    <div style={{ display: 'flex', gap: '32px' }}>
+                        <div>
+                            <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>デザート</label>
+                            <label className="toggle-switch" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                <div style={{
+                                    width: '48px',
+                                    height: '24px',
+                                    backgroundColor: form.dessert ? 'var(--primary)' : '#e5e7eb',
+                                    borderRadius: '12px',
+                                    position: 'relative',
+                                    transition: 'background-color 0.2s'
+                                }}>
+                                    <div style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        backgroundColor: 'white',
+                                        borderRadius: '50%',
+                                        position: 'absolute',
+                                        top: '2px',
+                                        left: form.dessert ? '26px' : '2px',
+                                        transition: 'left 0.2s',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                                    }} />
+                                    <input
+                                        type="checkbox"
+                                        style={{ display: 'none' }}
+                                        checked={form.dessert}
+                                        onChange={(e) => setForm({ ...form, dessert: e.target.checked })}
+                                    />
+                                </div>
+                                <span style={{ fontSize: '0.9rem', color: form.dessert ? 'var(--primary)' : 'var(--text-sub)' }}>
+                                    {form.dessert ? 'あり' : 'なし'}
+                                </span>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>アルコール</label>
+                            <label className="toggle-switch" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                <div style={{
+                                    width: '48px',
+                                    height: '24px',
+                                    backgroundColor: form.alcohol ? 'var(--primary)' : '#e5e7eb',
+                                    borderRadius: '12px',
+                                    position: 'relative',
+                                    transition: 'background-color 0.2s'
+                                }}>
+                                    <div style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        backgroundColor: 'white',
+                                        borderRadius: '50%',
+                                        position: 'absolute',
+                                        top: '2px',
+                                        left: form.alcohol ? '26px' : '2px',
+                                        transition: 'left 0.2s',
+                                        boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                                    }} />
+                                    <input
+                                        type="checkbox"
+                                        style={{ display: 'none' }}
+                                        checked={form.alcohol}
+                                        onChange={(e) => setForm({ ...form, alcohol: e.target.checked })}
+                                    />
+                                </div>
+                                <span style={{ fontSize: '0.9rem', color: form.alcohol ? 'var(--primary)' : 'var(--text-sub)' }}>
+                                    {form.alcohol ? 'あり' : 'なし'}
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ marginTop: '32px' }}>
+                    <button className="btn-primary" style={{ width: '100%' }} onClick={handleSave}>
+                        <Save size={18} />
+                        内容を保存
+                    </button>
+                </div>
+            </section>
         </>
     );
 };
