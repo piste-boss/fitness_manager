@@ -66,35 +66,34 @@ export default function AdminPage() {
                     <Dumbbell size={18} />
                     トレーニング管理
                 </button>
+
+                <button
+                    onClick={() => setActiveTab('counseling')}
+                    style={{
+                        flex: 1,
+                        padding: '10px',
+                        borderRadius: '6px',
+                        backgroundColor: activeTab === 'counseling' ? 'white' : 'transparent',
+                        color: activeTab === 'counseling' ? 'var(--primary-dark)' : 'var(--text-sub)',
+                        fontWeight: activeTab === 'counseling' ? '700' : '500',
+                        boxShadow: activeTab === 'counseling' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    <Utensils size={18} />
+                    食事カウンセリング
+                </button>
             </div>
 
-            <button
-                onClick={() => setActiveTab('counseling')}
-                style={{
-                    flex: 1,
-                    padding: '10px',
-                    borderRadius: '6px',
-                    backgroundColor: activeTab === 'counseling' ? 'white' : 'transparent',
-                    color: activeTab === 'counseling' ? 'var(--primary-dark)' : 'var(--text-sub)',
-                    fontWeight: activeTab === 'counseling' ? '700' : '500',
-                    boxShadow: activeTab === 'counseling' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                    border: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                }}
-            >
-                <Utensils size={18} />
-                食事カウンセリング
-            </button>
-        </div>
-
-            { activeTab === 'settings' && <SettingsTab /> }
-    { activeTab === 'training' && <TrainingTab /> }
-    { activeTab === 'counseling' && <CounselingTab /> }
+            {activeTab === 'settings' && <SettingsTab />}
+            {activeTab === 'training' && <TrainingTab />}
+            {activeTab === 'counseling' && <CounselingTab />}
         </div >
     );
 }
@@ -771,6 +770,13 @@ const CounselingTab = () => {
         if (h !== 12) WAKEUP_TIMES.push(`${h.toString().padStart(2, '0')}:30`);
     }
 
+    const BEDTIME_TIMES = [];
+    const bedtimeHours = [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5];
+    bedtimeHours.forEach(h => {
+        BEDTIME_TIMES.push(`${h.toString().padStart(2, '0')}:00`);
+        BEDTIME_TIMES.push(`${h.toString().padStart(2, '0')}:30`);
+    });
+
     const BREAKFAST_OPTS = ["パン", "ご飯", "卵", "ウインナー", "コーヒー", "プロテイン", "その他"];
     const LUNCH_OPTS = ["ご飯", "パン", "ラーメン", "定食", "パスタ"];
     const DINNER_OPTS = ["ご飯", "パン", "おかず", "味噌汁", "サラダ"];
@@ -780,14 +786,18 @@ const CounselingTab = () => {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [form, setForm] = useState({
         wakeupTime: '07:00',
+        bedtime: '23:00',
         breakfast: [],
         morningSnack: '',
         lunch: [],
         afternoonSnack: '',
         dinner: [],
         dessert: false,
+        dessert: false,
         alcohol: false
     });
+    const [diagnosis, setDiagnosis] = useState('');
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     // Load Data
     useEffect(() => {
@@ -799,6 +809,7 @@ const CounselingTab = () => {
             } else {
                 setForm({
                     wakeupTime: '07:00',
+                    bedtime: '23:00',
                     breakfast: [],
                     morningSnack: '',
                     lunch: [],
@@ -807,6 +818,7 @@ const CounselingTab = () => {
                     dessert: false,
                     alcohol: false
                 });
+                setDiagnosis('');
             }
         };
         loadData();
@@ -824,12 +836,83 @@ const CounselingTab = () => {
         });
     };
 
+    const analyzeMeal = async (currentForm) => {
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            setDiagnosis('APIキーが設定されていません。システム設定からAPIキーを保存してください。');
+            return;
+        }
+
+        setIsAnalyzing(true);
+        setDiagnosis('AIが診断中...');
+
+        const prompt = `
+以下の食事内容と生活習慣に基づいて、プロのパーソナルトレーナーとして簡潔なフィードバックと改善アドバイスをください。
+ターゲット: ダイエットと筋肥大を目指す一般成人
+
+起床時間: ${currentForm.wakeupTime}
+就寝時間: ${currentForm.bedtime}
+朝食: ${currentForm.breakfast.join(', ') || 'なし'}
+午前間食: ${currentForm.morningSnack || 'なし'}
+昼食: ${currentForm.lunch.join(', ') || 'なし'}
+午後間食: ${currentForm.afternoonSnack || 'なし'}
+夕食: ${currentForm.dinner.join(', ') || 'なし'}
+デザート: ${currentForm.dessert ? 'あり' : 'なし'}
+アルコール: ${currentForm.alcohol ? 'あり' : 'なし'}
+
+出力形式:
+【良い点】
+・...
+【改善点】
+・...
+【アドバイス】
+・...
+`;
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('API request failed');
+            }
+
+            const data = await response.json();
+            const text = data.candidates[0].content.parts[0].text;
+            setDiagnosis(text);
+
+            // Save diagnosis with record
+            const allRecords = JSON.parse(localStorage.getItem('counselingRecords') || '{}');
+            const key = `${selectedMember}_${date}`;
+            allRecords[key] = { ...currentForm, diagnosis: text };
+            localStorage.setItem('counselingRecords', JSON.stringify(allRecords));
+
+        } catch (error) {
+            console.error('Error:', error);
+            setDiagnosis('診断中にエラーが発生しました。ネットワーク接続やAPIキーを確認してください。');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
     const handleSave = () => {
         const allRecords = JSON.parse(localStorage.getItem('counselingRecords') || '{}');
         const key = `${selectedMember}_${date}`;
         allRecords[key] = form;
         localStorage.setItem('counselingRecords', JSON.stringify(allRecords));
-        alert('カウンセリング内容を保存しました');
+        // alert('カウンセリング内容を保存しました'); // Removed alert to seamlessly transition to AI analysis
+        analyzeMeal(form);
     };
 
     return (
@@ -869,17 +952,30 @@ const CounselingTab = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    {/* Wakeup Time */}
-                    <div>
-                        <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>起床時間</label>
-                        <select
-                            className="form-select"
-                            style={{ width: '100%' }}
-                            value={form.wakeupTime}
-                            onChange={(e) => setForm({ ...form, wakeupTime: e.target.value })}
-                        >
-                            {WAKEUP_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
+                    {/* Wakeup & Bedtime */}
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        <div style={{ flex: 1 }}>
+                            <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>起床時間</label>
+                            <select
+                                className="form-select"
+                                style={{ width: '100%' }}
+                                value={form.wakeupTime}
+                                onChange={(e) => setForm({ ...form, wakeupTime: e.target.value })}
+                            >
+                                {WAKEUP_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>就寝時間</label>
+                            <select
+                                className="form-select"
+                                style={{ width: '100%' }}
+                                value={form.bedtime}
+                                onChange={(e) => setForm({ ...form, bedtime: e.target.value })}
+                            >
+                                {BEDTIME_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
                     </div>
 
                     {/* Breakfast */}
@@ -907,7 +1003,10 @@ const CounselingTab = () => {
                             className="form-input"
                             placeholder="例: ナッツ、チョコレート"
                             value={form.morningSnack}
-                            onChange={(e) => setForm({ ...form, morningSnack: e.target.value })}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setForm(prev => ({ ...prev, morningSnack: val }));
+                            }}
                         />
                     </div>
 
@@ -936,7 +1035,10 @@ const CounselingTab = () => {
                             className="form-input"
                             placeholder="例: プロテイン、おにぎり"
                             value={form.afternoonSnack}
-                            onChange={(e) => setForm({ ...form, afternoonSnack: e.target.value })}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setForm(prev => ({ ...prev, afternoonSnack: val }));
+                            }}
                         />
                     </div>
 
@@ -1032,11 +1134,43 @@ const CounselingTab = () => {
                 </div>
 
                 <div style={{ marginTop: '32px' }}>
-                    <button className="btn-primary" style={{ width: '100%' }} onClick={handleSave}>
-                        <Save size={18} />
-                        内容を保存
+                    <button
+                        className="btn-primary"
+                        style={{ width: '100%' }}
+                        onClick={handleSave}
+                        disabled={isAnalyzing}
+                    >
+                        {isAnalyzing ? (
+                            <>
+                                <span className="spinner" style={{ marginRight: '8px' }}></span>
+                                診断中...
+                            </>
+                        ) : (
+                            <>
+                                <Save size={18} />
+                                保存してAI診断を実行
+                            </>
+                        )}
                     </button>
                 </div>
+
+                {/* AI Diagnosis Result */}
+                {diagnosis && (
+                    <div style={{
+                        marginTop: '24px',
+                        padding: '20px',
+                        backgroundColor: '#f0f9ff',
+                        borderRadius: '8px',
+                        border: '1px solid #bae6fd'
+                    }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#0369a1', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span role="img" aria-label="robot">🤖</span> AIトレーナーからのアドバイス
+                        </h3>
+                        <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '0.95rem', color: '#334155' }}>
+                            {diagnosis}
+                        </div>
+                    </div>
+                )}
             </section>
         </>
     );
